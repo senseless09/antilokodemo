@@ -1,0 +1,275 @@
+<!doctype html>
+<!-- BETA BUILD – DEMO by Lucho -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Démo d’AntiLoko pour BetAndYou — par Dossou</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    :root{ --bg:#0b0f14; --card:#0f1520; --line:rgba(255,255,255,.08); --neon:#60f7a2; --vio:#7c7cff; --text:#dbe7ff; }
+    html,body{height:100%}
+    body{
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(124,124,255,.12), transparent),
+        radial-gradient(1000px 600px at 110% 0%, rgba(96,247,162,.10), transparent),
+        var(--bg);
+    }
+    .wrap{max-width:1100px}
+    .glass{background:rgba(0,0,0,.4);backdrop-filter:blur(8px)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(6px)}
+    .btn{border:1px solid rgba(96,247,162,.35);color:#e8fff0;background:rgba(96,247,162,.08);padding:.75rem 1.1rem;border-radius:12px;transition:.2s}
+    .btn:hover{box-shadow:0 0 0 3px rgba(96,247,162,.12),0 0 24px rgba(96,247,162,.35) inset}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{border:1px solid rgba(124,124,255,.35);background:rgba(124,124,255,.08);color:#EAEAFE}
+    .chip{border:1px solid rgba(124,124,255,.4);background:rgba(124,124,255,.12);color:#eaeafe;border-radius:999px;padding:.25rem .6rem;font-size:.8rem}
+    .console-surface{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.06);border-radius:12px;backdrop-filter:blur(3px)}
+    .game-card{transition:.2s}
+    .game-card:hover{box-shadow:0 0 0 3px rgba(124,124,255,.12) inset}
+    .cell{display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);transition:.15s}
+    .cell:hover{box-shadow:0 0 0 3px rgba(124,124,255,.12) inset}
+    .cell-sm{width:48px;height:48px}
+    @media (min-width:768px){.cell-sm{width:56px;height:56px}}
+    .modal-overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+      background: radial-gradient(500px 300px at 50% 30%, rgba(96,247,162,.10), transparent), rgba(7,10,14,.65)}
+    .modal{width:min(92vw,620px);outline:none}
+    .modal-card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(124,124,255,.25);border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+    .hidden-panel{display:none}
+    .pe-none{pointer-events:none !important}
+    .focus-ring:focus{outline:2px solid rgba(124,124,255,.55);outline-offset:2px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  </style>
+</head>
+<body class="min-h-screen selection:bg-emerald-500/20 selection:text-emerald-100">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 border-b border-white/5 glass">
+    <div class="wrap mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo.png" alt="AntiLoko Logo" class="h-8 w-auto">
+        <div class="font-semibold text-base sm:text-lg">
+          <span class="text-green-300">BetAndYou</span><span class="text-gray-400"> // </span>
+          <span class="text-indigo-300">Démo d’AntiLoko</span>
+          <span class="chip ml-2">par Dossou</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="attemptChip" class="chip" aria-live="polite">Démo: 0/5</span>
+        <span id="timerChip" class="chip" aria-live="polite">Temps restant: 30:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main app root (здесь блокируем клики фона) -->
+  <main id="appRoot" class="wrap mx-auto px-4 py-6 md:py-8">
+    <!-- ID -->
+    <section id="screen-id">
+      <div class="card p-6 md:p-8">
+        <h1 class="text-2xl md:text-3xl font-semibold mb-2">Connecte ton ID BetAndYou</h1>
+        <p class="text-sm md:text-base text-blue-100/70 mb-6">Entre <b>exactement 10 chiffres</b> en commençant par <b>137</b>. Exemple: <span class="mono">137XXXXXXX</span></p>
+        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <input id="idInput" inputmode="numeric" autocomplete="off" maxlength="10" aria-describedby="idHint"
+            class="w-full bg-slate-900 text-slate-100 placeholder-slate-500 border border-white/10 rounded-lg px-4 py-3 tracking-widest text-lg focus-ring"
+            placeholder="137XXXXXXX" />
+          <button id="btnConnect" class="btn text-lg sm:w-40 focus-ring" disabled>Connecter</button>
+        </div>
+        <p id="idHint" class="text-rose-400 text-sm mt-3 hidden">L’ID doit commencer par <span class="mono">137</span>.</p>
+      </div>
+    </section>
+
+    <!-- Select + Console -->
+    <section id="screen-select" class="hidden-panel" aria-hidden="true">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="chip" id="attemptInline" aria-hidden="true">Démo: 0/5</span>
+        <span class="chip" id="timerInline" aria-hidden="true">Temps restant: 30:00</span>
+      </div>
+
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <article class="game-card card p-6 flex flex-col">
+          <div class="flex items-center justify-between mb-1"><h3 class="text-xl font-semibold">Aviator</h3><span class="chip">hot</span></div>
+          <p class="text-blue-100/70 mb-4">Jeu Crash, prédiction unique.</p>
+          <div class="mt-auto"><button class="btn w-28" data-open="aviator">Ouvrir</button></div>
+        </article>
+        <article class="game-card card p-6 flex flex-col">
+          <h3 class="text-xl font-semibold mb-1">Mines</h3>
+          <p class="text-blue-100/70 mb-4">Grille 5×5, mines marquées avec <span class="mono">💥</span>.</p>
+          <div class="mt-auto"><button class="btn w-28" data-open="mines">Ouvrir</button></div>
+        </article>
+        <article class="game-card card p-6 flex flex-col">
+          <h3 class="text-xl font-semibold mb-1">Penalty</h3>
+          <p class="text-blue-100/70 mb-4">Cage 4×6, cible marquée avec <span class="mono">⚽️</span>.</p>
+          <div class="mt-auto"><button class="btn w-28" data-open="penalty">Ouvrir</button></div>
+        </article>
+      </div>
+
+      <div id="console" class="mt-6">
+        <h4 class="font-semibold mb-2">Console Log</h4>
+        <div class="console-surface p-3 h-48 overflow-auto">
+          <pre id="logBox" class="mono text-sm whitespace-pre-wrap" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aviator -->
+    <section id="screen-aviator" class="hidden-panel">
+      <div class="card p-6 md:p-8">
+        <div class="flex items-center justify-between">
+          <h3 class="text-2xl font-semibold">Aviator — Prédiction</h3>
+          <button data-back class="btn-ghost px-4">Retour</button>
+        </div>
+        <div class="mt-6"><button id="aviatorGet" class="btn w-44">Obtenir la prédiction</button></div>
+        <div class="mt-8 flex justify-center"><div class="text-5xl">✈️</div></div>
+        <div class="mt-3 flex justify-center"><div id="aviatorChip" class="chip rounded-full px-5 py-2 text-2xl font-bold">–</div></div>
+      </div>
+    </section>
+
+    <!-- Mines -->
+    <section id="screen-mines" class="hidden-panel">
+      <div class="card p-6 md:p-8">
+        <div class="flex items-center justify-between">
+          <h3 class="text-2xl font-semibold">Mines — Prédiction</h3>
+          <button data-back class="btn-ghost px-4">Retour</button>
+        </div>
+        <div class="mt-6"><button id="minesGet" class="btn">Obtenir la prédiction</button></div>
+        <div class="mt-6 flex justify-center"><div id="minesGrid" class="grid grid-cols-5 gap-3"></div></div>
+      </div>
+    </section>
+
+    <!-- Penalty -->
+    <section id="screen-penalty" class="hidden-panel">
+      <div class="card p-6 md:p-8">
+        <div class="flex items-center justify-between">
+          <h3 class="text-2xl font-semibold">Penalty — Prédiction</h3>
+          <button data-back class="btn-ghost px-4">Retour</button>
+        </div>
+        <div class="mt-6"><button id="penaltyGet" class="btn">Obtenir la prédiction</button></div>
+        <div class="mt-6 flex justify-center"><div id="penaltyGrid" class="grid grid-cols-6 gap-3"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модалки вынесены ВНЕ appRoot, чтобы блокировка фона не перекрывала их -->
+  <!-- Pre‑demo -->
+  <div id="introOverlay" class="modal-overlay" aria-hidden="true">
+    <div id="introDialog" class="modal" role="dialog" aria-modal="true" aria-labelledby="introTitle" aria-describedby="introDesc" tabindex="-1">
+      <div class="modal-card p-6 md:p-7">
+        <h2 id="introTitle" class="text-2xl md:text-3xl font-semibold mb-2">
+          Ton compte est NOUVEAU et risque d’être bloqué pendant la vérification BetAndYou.
+        </h2>
+        <p id="introDesc" class="text-blue-100/85 mb-5">Tu as <b>5 prédictions d’essai</b>.</p>
+        <button id="btnContinue" type="button" class="btn focus-ring">Continuer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finish -->
+  <div id="endOverlay" class="modal-overlay" aria-hidden="true">
+    <div id="endDialog" class="modal" role="dialog" aria-modal="true" aria-labelledby="endTitle" aria-describedby="endDesc" tabindex="-1">
+      <div class="modal-card p-6 md:p-7">
+        <h2 id="endTitle" class="text-2xl md:text-3xl font-semibold mb-2">Test fini — plus de prédictions, dèh.</h2>
+        <p id="endDesc" class="text-blue-100/80 mb-5">
+          Envoie ton code secret. <span class="mono">“0910”</span> to <span class="mono">@AntiLokoBJ_bot</span> pour avoir la version complète.
+        </p>
+        <a id="endTgBtn" class="btn inline-flex items-center gap-2 focus-ring" href="https://t.me/AntiLokoBJ_bot" target="_blank" rel="noopener">
+          Ouvre Telegram : @AntiLokoBJ_bot
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== State =====
+    const State={key:'smartstack_demo_state_v4',max:5,dur:30*60*1000,activated:false,id:null,startAt:null,used:0,locked:false,reason:null,timer:null,logT:null,buf:[]};
+    // ===== Elements =====
+    const el={
+      app:document.getElementById('appRoot'),
+      // screens
+      sId:document.getElementById('screen-id'), sSel:document.getElementById('screen-select'),
+      sA:document.getElementById('screen-aviator'), sM:document.getElementById('screen-mines'), sP:document.getElementById('screen-penalty'),
+      // id
+      id:document.getElementById('idInput'), btnConn:document.getElementById('btnConnect'), hint:document.getElementById('idHint'),
+      // chips
+      cTry:document.getElementById('attemptChip'), cTime:document.getElementById('timerChip'),
+      cTry2:document.getElementById('attemptInline'), cTime2:document.getElementById('timerInline'),
+      // console
+      log:document.getElementById('logBox'),
+      // modals
+      introO:document.getElementById('introOverlay'), introD:document.getElementById('introDialog'), btnGo:document.getElementById('btnContinue'),
+      endO:document.getElementById('endOverlay'), endD:document.getElementById('endDialog'), endBtn:document.getElementById('endTgBtn'),
+      // games
+      aGet:document.getElementById('aviatorGet'), aChip:document.getElementById('aviatorChip'),
+      mGet:document.getElementById('minesGet'), mGrid:document.getElementById('minesGrid'),
+      pGet:document.getElementById('penaltyGet'), pGrid:document.getElementById('penaltyGrid')
+    };
+    // ===== Utils =====
+    const ID_RE=/^137\d{7}$/;
+    const fmt=(ms)=>`${String(Math.max(0,Math.floor(ms/60000))).padStart(2,'0')}:${String(Math.max(0,Math.floor((ms%60000)/1000))).padStart(2,'0')}`;
+    const logId=()=> '137'+Math.floor(Math.random()*1e7).toString().padStart(7,'0');
+    const avVal=()=> (Math.random()*(40.99-0.01)+0.01).toFixed(2);
+    const show=(name)=>{ const map={id:el.sId,select:el.sSel,aviator:el.sA,mines:el.sM,penalty:el.sP}; Object.values(map).forEach(v=>v.classList.add('hidden-panel')); map[name].classList.remove('hidden-panel'); el.sSel.setAttribute('aria-hidden',name==='id'?'true':'false'); };
+    const save=()=>localStorage.setItem(State.key,JSON.stringify({activated:State.activated,id:State.id,startAt:State.startAt,used:State.used,locked:State.locked,reason:State.reason}));
+    const load=()=>{try{const r=localStorage.getItem(State.key); if(!r)return; const s=JSON.parse(r); Object.assign(State,s);}catch{}};
+    const setBgInteractive=(on)=> el.app.classList.toggle('pe-none',!on || State.locked);
+    const trap=(node)=>{ const h=(e)=>{ if(e.key!=='Tab')return; const fs=[...node.querySelectorAll('a[href],button:not([disabled]),select:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])')]; if(!fs.length)return; const f=fs[0],l=fs[fs.length-1]; if(!e.shiftKey&&document.activeElement===l){e.preventDefault();f.focus()} if(e.shiftKey&&document.activeElement===f){e.preventDefault();l.focus()} }; document.addEventListener('keydown',h,true); node._trap=h; };
+    const untrap=(node)=>{ if(node&&node._trap){document.removeEventListener('keydown',node._trap,true); node._trap=null;} };
+    const blockEscOn=()=>document.addEventListener('keydown',escBlock,true);
+    const blockEscOff=()=>document.removeEventListener('keydown',escBlock,true);
+    const escBlock=(e)=>{ if(e.key==='Escape') e.preventDefault(); };
+    const tickTime=()=>{ const left=(State.startAt?State.startAt+30*60*1000:State.dur)-Date.now(); const lbl=`:Temps restant ${fmt(left)}`; el.cTime.textContent=lbl; el.cTime2.textContent=lbl; if(left<=0&&!State.locked) finish('time'); };
+    const updChips=()=>{ const lbl=`Essai: ${State.used}/${State.max}`; el.cTry.textContent=lbl; el.cTry2.textContent=lbl; };
+
+    // ===== ID Flow =====
+    el.id.addEventListener('keydown',(e)=>{ if(['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key))return; if(!/^\d$/.test(e.key)) e.preventDefault(); });
+    el.id.addEventListener('input',()=>{ const ok=ID_RE.test(el.id.value.trim()); el.btnConn.disabled=!ok; el.hint.classList.toggle('hidden',ok); });
+    el.btnConn.addEventListener('click',()=>{ const v=el.id.value.trim(); if(!ID_RE.test(v))return; State.activated=true; State.id=v; State.used=0; State.locked=false; State.reason=null; State.startAt=null; save(); show('select'); updChips(); openIntro(); });
+
+    // ===== Intro Modal =====
+    function openIntro(){ setBgInteractive(false); el.introO.style.display='flex'; el.introO.removeAttribute('aria-hidden'); trap(el.introD); blockEscOn(); requestAnimationFrame(()=>el.btnGo.focus()); }
+    function closeIntro(){ el.introO.style.display='none'; el.introO.setAttribute('aria-hidden','true'); untrap(el.introD); blockEscOff(); setBgInteractive(true); }
+    el.btnGo.addEventListener('click',()=>{ State.startAt=Date.now(); save(); closeIntro(); startLog(); startTimer(); });
+
+    // ===== Timer =====
+    function startTimer(){ stopTimer(); tickTime(); State.timer=setInterval(tickTime,1000); }
+    function stopTimer(){ if(State.timer){clearInterval(State.timer); State.timer=null;} }
+
+    // ===== Attempts =====
+    const canAct=()=> !State.locked && State.startAt!==null && (State.startAt+State.dur-Date.now())>0;
+    function useAttempt(){ if(!canAct()){ if(State.locked) openEnd(); else if(State.startAt===null) openIntro(); else finish('time'); return false; } State.used=Math.min(State.max,State.used+1); updChips(); save(); if(State.used>=State.max){ finish('limit'); return false; } return true; }
+
+    // ===== Finish Modal =====
+    function finish(reason){ if(State.locked) return; State.locked=true; State.reason=reason; save(); stopTimer(); stopLog(); setBgInteractive(false);
+      document.getElementById('endTitle').textContent = (reason==='time') ? 'Ton temps d’essai est terminé.' : '👉 Tes prédictions d’essai sont terminées.'; openEnd(); }
+    function openEnd(){ el.endO.style.display='flex'; el.endO.removeAttribute('aria-hidden'); trap(el.endD); blockEscOn(); requestAnimationFrame(()=>el.endBtn.focus()); }
+
+    // ===== Console feed =====
+    function startLog(){ stopLog(); nextLine(); }
+    function stopLog(){ if(State.logT){clearTimeout(State.logT); State.logT=null;} }
+    function nextLine(){ State.logT=setTimeout(()=>{ const id=logId(); const t=Math.floor(Math.random()*3); const line = t===0?`ID ${id} predict Aviator — ${avVal()}`: t===1?`ID ${id} predict Mines`:`ID ${id} predict Penalty`; State.buf.push(line); if(State.buf.length>200) State.buf.splice(0,State.buf.length-200); el.log.textContent=State.buf.join('\n'); el.log.parentElement.scrollTop=el.log.parentElement.scrollHeight; nextLine(); },1000+Math.floor(Math.random()*1001)); }
+
+    // ===== Games =====
+    document.querySelectorAll('[data-open="aviator"]').forEach(b=>b.addEventListener('click',()=>show('aviator')));
+    document.querySelectorAll('[data-open="mines"]').forEach(b=>b.addEventListener('click',()=>show('mines')));
+    document.querySelectorAll('[data-open="penalty"]').forEach(b=>b.addEventListener('click',()=>show('penalty')));
+    document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>show('select')));
+
+    el.aGet.addEventListener('click',()=>{ if(!useAttempt()) return; el.aChip.textContent=avVal(); });
+
+    // Mines grid + action (3 💥)
+    (function buildM(){ el.mGrid.innerHTML=''; for(let i=0;i<25;i++){ const d=document.createElement('div'); d.className='cell cell-sm text-xl select-none'; el.mGrid.appendChild(d);} })();
+    el.mGet.addEventListener('click',()=>{ if(!useAttempt())return; const cells=[...el.mGrid.children]; cells.forEach(c=>c.textContent=''); const s=new Set(); while(s.size<3) s.add(Math.floor(Math.random()*25)); [...s].forEach(i=>cells[i].textContent='💥'); });
+
+    // Penalty grid + action (⚽️)
+    (function buildP(){ el.pGrid.innerHTML=''; for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='cell cell-sm text-xl select-none'; el.pGrid.appendChild(d);} })();
+    el.pGet.addEventListener('click',()=>{ if(!useAttempt())return; const cells=[...el.pGrid.children]; cells.forEach(c=>c.textContent=''); cells[Math.floor(Math.random()*24)].textContent='⚽️'; });
+
+    // ===== Boot =====
+    (function boot(){
+      load(); updChips();
+      if(State.locked){ show('select'); setBgInteractive(false); document.getElementById('endTitle').textContent=(State.reason==='time')?'Ton temps d’essai est terminé.':'👉 Tes prédictions d’essai sont terminées.'; openEnd(); return; }
+      if(State.activated){ show('select'); if(State.startAt===null){ openIntro(); } else { setBgInteractive(true); startLog(); startTimer(); } return; }
+      show('id');
+    })();
+  </script>
+</body>
+</html>
