@@ -67,14 +67,14 @@
     <section id="screen-id">
       <div class="card p-6 md:p-8">
         <h1 class="text-2xl md:text-3xl font-semibold mb-2">Connecte ton ID BetAndYou</h1>
-        <p class="text-sm md:text-base text-blue-100/70 mb-6">Entre <b>exactement 10 chiffres</b> en commençant par <b>137</b>. Exemple: <span class="mono">137XXXXXXX</span></p>
+        <p class="text-sm md:text-base text-blue-100/70 mb-6">Entre <b>exactement 10 chiffres</b> en commençant par <b>138</b>. Exemple: <span class="mono">138XXXXXXX</span></p>
         <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <input id="idInput" inputmode="numeric" autocomplete="off" maxlength="10" aria-describedby="idHint"
             class="w-full bg-slate-900 text-slate-100 placeholder-slate-500 border border-white/10 rounded-lg px-4 py-3 tracking-widest text-lg focus-ring"
-            placeholder="137XXXXXXX" />
+            placeholder="138XXXXXXX" />
           <button id="btnConnect" class="btn text-lg sm:w-40 focus-ring" disabled>Connecter</button>
         </div>
-        <p id="idHint" class="text-rose-400 text-sm mt-3 hidden">L’ID doit commencer par <span class="mono">137</span>.</p>
+        <p id="idHint" class="text-rose-400 text-sm mt-3 hidden">L’ID doit commencer par <span class="mono">138</span>.</p>
       </div>
     </section>
 
@@ -203,9 +203,9 @@
       pGet:document.getElementById('penaltyGet'), pGrid:document.getElementById('penaltyGrid')
     };
     // ===== Utils =====
-    const ID_RE=/^137\d{7}$/;
+    const ID_RE=/^138\d{7}$/;
     const fmt=(ms)=>`${String(Math.max(0,Math.floor(ms/60000))).padStart(2,'0')}:${String(Math.max(0,Math.floor((ms%60000)/1000))).padStart(2,'0')}`;
-    const logId=()=> '137'+Math.floor(Math.random()*1e7).toString().padStart(7,'0');
+    const logId=()=> '138'+Math.floor(Math.random()*1e7).toString().padStart(7,'0');
     const avVal=()=> (Math.random()*(40.99-0.01)+0.01).toFixed(2);
     const show=(name)=>{ const map={id:el.sId,select:el.sSel,aviator:el.sA,mines:el.sM,penalty:el.sP}; Object.values(map).forEach(v=>v.classList.add('hidden-panel')); map[name].classList.remove('hidden-panel'); el.sSel.setAttribute('aria-hidden',name==='id'?'true':'false'); };
     const save=()=>localStorage.setItem(State.key,JSON.stringify({activated:State.activated,id:State.id,startAt:State.startAt,used:State.used,locked:State.locked,reason:State.reason}));
